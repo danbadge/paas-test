@@ -1,0 +1,14 @@
+Port forwarding docker-machine so that kubectl can talk to apiservers
+
+docker-machine env default
+ssh -f -T -N -L8080:localhost:8080 -l docker $(echo $DOCKER_HOST | cut -d ':' -f 2 | tr -d '/')
+
+0.1 you will need docker toolbox
+1. docker-machine create default
+2. set docker-machine env default
+3. start kubernetes
+4. run cheeky-api
+5. ssh on to ip address of svc to curl svc
+
+# how to expose over docker machine
+# which replica responds when? round robin?
