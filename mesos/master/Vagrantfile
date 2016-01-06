@@ -37,6 +37,9 @@ Vagrant.configure(2) do |config|
     sudo cp /vagrant/zoo.cfg /etc/zookeeper/conf/zoo.cfg
 
     sudo sh -c "echo zk://192.168.0.10:2181/mesos > /etc/mesos/zk"
+    
+    # don't lookup hostnames - use ips
+    sudo sh -c "echo false > /etc/mesos-master/hostname_lookup"
 
     # set ip address flag used when running mesos master
     sudo sh -c "echo IP=192.168.0.10 >> /etc/default/mesos-master"
@@ -48,6 +51,8 @@ Vagrant.configure(2) do |config|
     # Install Java 8 from Oracle's PPA
     sudo add-apt-repository ppa:webupd8team/java
     sudo apt-get update -y
+    # accept licence automatically by setting this
+    sudo sh -c "echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections"
     sudo apt-get install -y oracle-java8-installer oracle-java8-set-default
 
     sudo apt-get install -y marathon
