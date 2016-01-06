@@ -10,7 +10,7 @@ Vagrant.configure(2) do |config|
   # config.vm.network "forwarded_port", guest: 80, host: 8080
 
   # Create a private network, which allows host-only access to the machine
-  config.vm.network "private_network", ip: "192.168.50.10"
+  config.vm.network "private_network", ip: "192.168.0.10"
   
   config.vm.provider "virtualbox" do |vb|
      # Display the VirtualBox GUI when booting the machine
@@ -32,15 +32,26 @@ Vagrant.configure(2) do |config|
     # install mesos - this pulls in zookeeper
     sudo apt-get -y install mesos
 
-    sudo su -c "echo 5 > /etc/zookeeper/conf/myid"
+    sudo sh -c "echo 5 > /etc/zookeeper/conf/myid"
 
     sudo cp /vagrant/zoo.cfg /etc/zookeeper/conf/zoo.cfg
 
+    sudo sh -c "echo zk://192.168.0.10:2181/mesos > /etc/mesos/zk"
+
+    # set ip address flag used when running mesos master
+    sudo sh -c "echo IP=192.168.0.10 >> /etc/default/mesos-master"
+
     sudo service zookeeper restart
-
-    sudo su -c "echo zk://192.168.50.10:2181/mesos > /etc/mesos/zk"
-
     sudo service mesos-master restart
+
+    # needed to install marathon's dependencies        
+    # Install Java 8 from Oracle's PPA
+    # sudo add-apt-repository ppa:webupd8team/java
+    # sudo apt-get update -y
+    # sudo apt-get install -y oracle-java8-installer oracle-java8-set-default
+
+    # sudo apt-get install -y marathon
+    # sudo service marathon restart
 
   SHELL
 end
