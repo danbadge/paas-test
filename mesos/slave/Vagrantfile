@@ -9,8 +9,8 @@ Vagrant.configure(2) do |config|
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
 
-  # Create a private network, which allows host-only access to the machine
-  config.vm.network "private_network", ip: "192.168.0.20"
+  # Assign private ip
+  # config.vm.network "private_network", ip: "192.168.0.20"
   
   config.vm.provider "virtualbox" do |vb|
      # Display the VirtualBox GUI when booting the machine
@@ -18,7 +18,36 @@ Vagrant.configure(2) do |config|
      # Customize the amount of memory on the VM:
      vb.memory = "1024"
   end
-  
+
+  config.vm.define :slave1 do |slave|
+    # Assign private ip
+    ip = "192.168.0.20"
+    slave.vm.network "private_network", ip: ip
+    slave.vm.provision "shell", inline: <<-SHELL
+      echo "using ip address #{ip}"
+      sudo sh -c "echo IP=#{ip} >> /etc/default/mesos-slave"
+      sudo sh -c "echo #{ip} > /etc/mesos-slave/hostname"
+
+      # this runs last so restart all services
+      sudo service docker restart
+      sudo service mesos-slave restart
+    SHELL
+  end
+
+  config.vm.define :slave2 do |slave|
+    # Assign private ip
+    ip = "192.168.0.21"
+    slave.vm.network "private_network", ip: ip
+    slave.vm.provision "shell", inline: <<-SHELL
+      echo "using ip address #{ip}"
+      sudo sh -c "echo IP=#{ip} >> /etc/default/mesos-slave"
+      sudo sh -c "echo #{ip} > /etc/mesos-slave/hostname"
+
+      # this runs last so restart all services
+      sudo service docker restart
+      sudo service mesos-slave restart
+    SHELL
+  end
 
   config.vm.provision "shell", inline: <<-SHELL
     sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv E56151BF
@@ -43,9 +72,7 @@ Vagrant.configure(2) do |config|
     sudo service mesos-master stop
     sudo sh -c "echo manual > /etc/init/mesos-master.override"
 
-    # set ip address flag used when running mesos slave
-    sudo sh -c "echo IP=192.168.0.20 >> /etc/default/mesos-slave"
-    sudo sh -c "echo 192.168.0.20 > /etc/mesos-slave/hostname"
+    # disable hostname lookup
     sudo sh -c "echo false > /etc/mesos-slave/hostname_lookup"
 
     # enable docker support
@@ -57,11 +84,8 @@ Vagrant.configure(2) do |config|
 
     sudo apt-get -y install linux-image-extra-$(uname -r)
     sudo apt-get -y install docker-engine
-    sudo service docker restart
 
     sudo sh -c "echo 'docker,mesos' > /etc/mesos-slave/containerizers"
     sudo sh -c "echo '5mins' > /etc/mesos-slave/executor_registration_timeout"
-
-    sudo service mesos-slave restart
   SHELL
 end
