@@ -1,0 +1,21 @@
+---
+- name: add oracle's ppa to install java 8
+  apt_repository: repo='ppa:webupd8team/java'
+
+- name: update apt-get
+  apt: update_cache=yes
+
+- name: enable auto licence accept
+  shell: echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+
+- name: install java 8 installer
+  apt: name=oracle-java8-installer
+
+- name: install java 8 set default
+  apt: name=oracle-java8-set-default
+
+- name: install marathon
+  apt: name=marathon
+
+- name: start marathon
+  service: name=marathon state=restarted

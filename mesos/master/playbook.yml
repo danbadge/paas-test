@@ -1,0 +1,6 @@
+---
+- hosts: all
+  sudo: yes
+  roles: 
+    - mesos-master
+    - marathon

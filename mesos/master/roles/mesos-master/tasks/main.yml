@@ -1,0 +1,24 @@
+---
+- name: install mesos
+  apt: name=mesos update_cache=yes
+
+- name: start mesos-master
+  service: name=mesos-master state=restarted
+
+- name: start zookeeper
+  service: name=zookeeper state=restarted      
+
+- name: copy zookeeper config
+  copy: src=zookeeper/ dest=/etc/zookeeper/conf/
+  notify:
+    - restart zookeeper
+
+- name: copy mesos-master params
+  copy: src=mesos-master/ dest=/etc/mesos-master/
+  notify:
+    - restart mesos-master
+
+- name: copy mesos-master zookeeper hookup
+  copy: src=zk dest=/etc/mesos/zk
+  notify:
+    - restart mesos-master 
