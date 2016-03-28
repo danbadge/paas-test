@@ -1,0 +1,27 @@
+---
+- name: install python pip
+  apt: name=python-pip state=present update_cache=yes
+- name: install docker-py for ansible-docker support
+  pip: name=docker-py
+- name: install dependencies
+  apt: 'name={{ item }} state=present'
+  with_items:
+       - apt-transport-https
+       - ca-certificates
+- name: add docker gpg key
+  apt_key: keyserver=p80.pool.sks-keyservers.net id=58118E89F3A912897C070ADBF76221572C52609D state=present
+- name: add file
+  copy:
+    content: "deb https://apt.dockerproject.org/repo ubuntu-trusty main"
+    dest: /etc/apt/sources.list.d/docker.list
+- name: install more dependencies
+  apt: 'name={{ item }} state=present'
+  with_items:
+       - linux-image-extra-3.13.0-43-generic
+       - apparmor
+- name: install docker
+  apt: name=docker-engine state=present update_cache=yes
+- name: start docker
+  service: name=docker state=started
+
+
